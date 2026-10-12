@@ -6,7 +6,6 @@ from kivy.uix.label import Label
 from kivy.uix.scrollview import ScrollView
 import random
 
-
 class TradeSim(BoxLayout):
     def __init__(self, **kwargs):
         super().__init__(orientation="vertical", padding=16, spacing=10, **kwargs)
@@ -14,7 +13,7 @@ class TradeSim(BoxLayout):
         self.cash = 10000.0
         self.btc = 0.0
         self.price = 60000.0
-        self.lines = ["شبیه‌ساز آموزشی. پول واقعی نیست."]
+        self.lines = ["شبیه‌ساز آموزشی - پول واقعی نیست"]
 
         self.status = Label(text="", font_size="20sp", size_hint_y=None, height="140dp")
         self.log = Label(text="", font_size="16sp", size_hint_y=None, halign="right", valign="top")
@@ -43,10 +42,10 @@ class TradeSim(BoxLayout):
     def refresh(self):
         worth = self.cash + self.btc * self.price
         self.status.text = (
-            f"قیمت ساختگی: {self.price:,.0f} دلار\n"
-            f"نقد: {self.cash:,.2f} دلار\n"
+            f"قیمت: {self.price:,.0f} دلار\n"
+            f"نقد: {self.cash:,.2f}\n"
             f"بیت‌کوین: {self.btc:.4f}\n"
-            f"ارزش کل: {worth:,.2f} دلار"
+            f"ارزش کل: {worth:,.2f}"
         )
         self.log.text = "\n".join(self.lines[-12:])
 
@@ -59,29 +58,27 @@ class TradeSim(BoxLayout):
         amount = 0.01
         cost = amount * self.price
         if self.cash < cost:
-            self.lines.append("نقد کافی نیست.")
+            self.lines.append("نقد کافی نیست")
         else:
             self.cash -= cost
             self.btc += amount
-            self.lines.append(f"خرید {amount} با قیمت {self.price:,.0f}")
+            self.lines.append(f"خرید {amount} با {self.price:,.0f}")
         self.refresh()
 
     def sell(self, _btn):
         amount = 0.01
         if self.btc < amount:
-            self.lines.append("بیت‌کوین کافی نیست.")
+            self.lines.append("بیت‌کوین کافی نیست")
         else:
             self.btc -= amount
             self.cash += amount * self.price
-            self.lines.append(f"فروش {amount} با قیمت {self.price:,.0f}")
+            self.lines.append(f"فروش {amount} با {self.price:,.0f}")
         self.refresh()
-
 
 class TradeSimApp(App):
     def build(self):
         self.title = "Trade Sim"
         return TradeSim()
-
 
 if __name__ == "__main__":
     TradeSimApp().run()
