@@ -6,7 +6,7 @@ prices = [
     103, 101, 100, 102, 104, 103, 101, 99, 98, 100,
 ]
 
-WINDOW = 5
+WINDOW = 3
 start_cash = 1000.0
 
 cash = start_cash
