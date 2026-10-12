@@ -1,23 +1,21 @@
 [app]
-title = Dog Runner
-package.name = dogrunner
+title = Trade Sim
+package.name = tradesim
 package.domain = org.masihgt
 
 source.dir = .
-source.include_exts = py,png,jpg,jpeg,ttf,ogg,mp3,wav
+source.include_exts = py,png,jpg,kv,ttf
 
 version = 0.1
+requirements = python3,kivy
 
-requirements = python3,pygame
-
-orientation = landscape
-fullscreen = 1
+orientation = portrait
+fullscreen = 0
 
 android.archs = arm64-v8a
 android.api = 33
 android.minapi = 24
 android.accept_sdk_license = True
-android.permissions = INTERNET,VIBRATE
 
 [buildozer]
 log_level = 2
