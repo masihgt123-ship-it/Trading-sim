@@ -1,68 +1,87 @@
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-
-PRICES = [
-    100, 101, 103, 102, 104, 106, 105, 107, 109, 108,
-    110, 112, 111, 109, 107, 106, 104, 103, 105, 107,
-    106, 104, 102, 100, 98, 97, 99, 101, 100, 98,
-    96, 95, 97, 99, 101, 103, 102, 104, 106, 105,
-    103, 101, 100, 102, 104, 103, 101, 99, 98, 100,
-]
-
-WINDOW = 5
-START_CASH = 1000.0
+from kivy.uix.scrollview import ScrollView
+import random
 
 
-def run_sim():
-    cash = START_CASH
-    coins = 0.0
-    buys = 0
-    sells = 0
+class TradeSim(BoxLayout):
+    def __init__(self, **kwargs):
+        super().__init__(orientation="vertical", padding=16, spacing=10, **kwargs)
 
-    for i in range(WINDOW, len(PRICES)):
-        price = PRICES[i]
-        avg = sum(PRICES[i - WINDOW:i]) / WINDOW
+        self.cash = 10000.0
+        self.btc = 0.0
+        self.price = 60000.0
+        self.lines = ["شبیه‌ساز آموزشی. پول واقعی نیست."]
 
-        if price > avg and coins == 0:
-            coins = cash / price
-            cash = 0.0
-            buys += 1
-        elif price < avg and coins > 0:
-            cash = coins * price
-            coins = 0.0
-            sells += 1
+        self.status = Label(text="", font_size="20sp", size_hint_y=None, height="140dp")
+        self.log = Label(text="", font_size="16sp", size_hint_y=None, halign="right", valign="top")
+        self.log.bind(texture_size=self._fit_log)
 
-    if coins > 0:
-        cash = coins * PRICES[-1]
-        sells += 1
+        scroll = ScrollView()
+        scroll.add_widget(self.log)
 
-    profit = cash - START_CASH
-    return (
-        f"شروع: {START_CASH:.2f}\n"
-        f"پایان: {cash:.2f}\n"
-        f"سود یا ضرر: {profit:.2f}\n"
-        f"معامله‌ها: {buys + sells}"
-    )
+        buy = Button(text="خرید ۰.۰۱ بیت‌کوین", size_hint_y=None, height="56dp")
+        sell = Button(text="فروش ۰.۰۱ بیت‌کوین", size_hint_y=None, height="56dp")
+        buy.bind(on_press=self.buy)
+        sell.bind(on_press=self.sell)
 
+        self.add_widget(self.status)
+        self.add_widget(buy)
+        self.add_widget(sell)
+        self.add_widget(scroll)
 
-class TradeSim(App):
-    def build(self):
-        box = BoxLayout(orientation="vertical", padding=24, spacing=16)
-        self.result = Label(
-            text="دکمه را بزن تا شبیه‌سازی اجرا شود.\nاین برنامه معامله واقعی نمی‌کند.",
-            font_size="20sp",
+        self.refresh()
+        Clock.schedule_interval(self.move_price, 1.5)
+
+    def _fit_log(self, *_):
+        self.log.height = self.log.texture_size[1]
+        self.log.text_size = (self.width - 32, None)
+
+    def refresh(self):
+        worth = self.cash + self.btc * self.price
+        self.status.text = (
+            f"قیمت ساختگی: {self.price:,.0f} دلار\n"
+            f"نقد: {self.cash:,.2f} دلار\n"
+            f"بیت‌کوین: {self.btc:.4f}\n"
+            f"ارزش کل: {worth:,.2f} دلار"
         )
-        button = Button(text="اجرا", size_hint_y=0.25, font_size="22sp")
-        button.bind(on_press=self.show_result)
-        box.add_widget(self.result)
-        box.add_widget(button)
-        return box
+        self.log.text = "\n".join(self.lines[-12:])
 
-    def show_result(self, _button):
-        self.result.text = run_sim()
+    def move_price(self, _dt):
+        change = random.uniform(-0.004, 0.004)
+        self.price = max(1000.0, self.price * (1 + change))
+        self.refresh()
+
+    def buy(self, _btn):
+        amount = 0.01
+        cost = amount * self.price
+        if self.cash < cost:
+            self.lines.append("نقد کافی نیست.")
+        else:
+            self.cash -= cost
+            self.btc += amount
+            self.lines.append(f"خرید {amount} با قیمت {self.price:,.0f}")
+        self.refresh()
+
+    def sell(self, _btn):
+        amount = 0.01
+        if self.btc < amount:
+            self.lines.append("بیت‌کوین کافی نیست.")
+        else:
+            self.btc -= amount
+            self.cash += amount * self.price
+            self.lines.append(f"فروش {amount} با قیمت {self.price:,.0f}")
+        self.refresh()
+
+
+class TradeSimApp(App):
+    def build(self):
+        self.title = "Trade Sim"
+        return TradeSim()
 
 
 if __name__ == "__main__":
-    TradeSim().run()
+    TradeSimApp().run()
