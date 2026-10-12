@@ -60,4 +60,3 @@ jobs:
           name: dogrunner-apk
           path: bin/*.apk
           if-no-files-found: error
-          
